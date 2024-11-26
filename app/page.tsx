@@ -14,6 +14,7 @@ interface MessageExample {
 const Home: React.FC = () => {
   const [activeTab, setActiveTab] = useState("General");
   const [activeNarrativeTab, setActiveNarrativeTab] = useState("Bio");
+  const [activeStyleTab, setActiveStyleTab] = useState("All");
 
   // General Information
   const [name, setName] = useState("");
@@ -31,6 +32,14 @@ const Home: React.FC = () => {
   const [messageExamples, setMessageExamples] = useState<
     { userQuestion: string; agentResponse: string }[]
   >([]);
+
+  // Post Examples
+  const [postExamples, setPostExamples] = useState<string[]>([]);
+
+  // Style
+  const [styleAll, setStyleAll] = useState<string[]>([]);
+  const [styleChat, setStyleChat] = useState<string[]>([]);
+  const [stylePost, setStylePost] = useState<string[]>([]);
 
   // JSON Import
   const handleJsonImport = (json: string) => {
@@ -52,6 +61,10 @@ const Home: React.FC = () => {
           agentResponse: example[1]?.content?.text || "",
         }))
       );
+      setPostExamples(parsed.postExamples || []);
+      setStyleAll(parsed.style?.all || []);
+      setStyleChat(parsed.style?.chat || []);
+      setStylePost(parsed.style?.post || []);
     } catch {
       alert("Invalid JSON format. Please check your input.");
     }
@@ -77,6 +90,12 @@ const Home: React.FC = () => {
         { user: "{{user1}}", content: { text: userQuestion } },
         { user: "agent", content: { text: agentResponse } },
       ]),
+      postExamples,
+      style: {
+        all: styleAll,
+        chat: styleChat,
+        post: stylePost,
+      },
     };
     downloadJson(jsonData, `${name || "file"}.json`);
   };
@@ -102,6 +121,12 @@ const Home: React.FC = () => {
           { user: "{{user1}}", content: { text: userQuestion } },
           { user: "agent", content: { text: agentResponse } },
         ]),
+        postExamples,
+        style: {
+          all: styleAll,
+          chat: styleChat,
+          post: stylePost,
+        },
       },
       null,
       2
@@ -117,7 +142,7 @@ const Home: React.FC = () => {
 
       {/* Top-level Tabs */}
       <div className="flex flex-wrap justify-center sm:justify-around mb-4 border-b border-text-secondary">
-        {["General", "Narratives", "Message Examples", "Full JSON", "Import JSON"].map((tab) => (
+        {["General", "Narratives", "Message Examples", "Post Examples", "Style", "Full JSON", "Import JSON"].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -231,6 +256,47 @@ const Home: React.FC = () => {
               values={messageExamples}
               setValues={setMessageExamples}
             />
+          </section>
+        )}
+
+        {activeTab === "Post Examples" && (
+          <section>
+            <h2 className="text-lg sm:text-xl font-semibold text-text-primary mb-4">
+              Post Examples
+            </h2>
+            <FormSection title="Post Examples" values={postExamples} setValues={setPostExamples} />
+          </section>
+        )}
+
+        {activeTab === "Style" && (
+          <section>
+            <h2 className="text-lg sm:text-xl font-semibold text-text-primary mb-4">Style</h2>
+
+            <div className="flex flex-wrap justify-center sm:justify-around mb-4 border-b border-text-secondary">
+              {["All", "Chat", "Post"].map((subTab) => (
+                <button
+                  key={subTab}
+                  onClick={() => setActiveStyleTab(subTab)}
+                  className={`px-2 py-1 sm:px-4 sm:py-2 text-sm sm:text-base rounded-t ${
+                    activeStyleTab === subTab
+                      ? "bg-card-bg text-text-primary"
+                      : "text-text-secondary hover:text-text-primary"
+                  }`}
+                >
+                  {subTab}
+                </button>
+              ))}
+            </div>
+
+            {activeStyleTab === "All" && (
+              <FormSection title="Style (All)" values={styleAll} setValues={setStyleAll} />
+            )}
+            {activeStyleTab === "Chat" && (
+              <FormSection title="Style (Chat)" values={styleChat} setValues={setStyleChat} />
+            )}
+            {activeStyleTab === "Post" && (
+              <FormSection title="Style (Post)" values={stylePost} setValues={setStylePost} />
+            )}
           </section>
         )}
 
